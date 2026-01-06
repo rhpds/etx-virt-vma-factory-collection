@@ -1,233 +1,236 @@
 ---
 
-- name: Set fact for ansible playbooks repo
-  set_fact:
-    s3_rhpds_private_base_url: "https://d18h2xbjo1t4w8.cloudfront.net"
-    s3_rhpds_private_username: rhpds-private
-    s3_rhpds_private_password: "{{ s3_rhpds_private_password }}"
-    virt_migration_archive_path: "etx_virt_vma_factory/"
-    virt_migration_archive_filename: "redhat-cop_openshift-virtualization-migration_openshift_virtualization_migration.zip"
+- hosts: bastion
+  tasks:
 
-- name: Download virt migration playbook archive
-  ansible.builtin.get_url:
-    url: "https://d18h2xbjo1t4w8.cloudfront.net/{{ virt_migration_archive_path }}{{ virt_migration_archive_filename }}"
-    dest: "/home/lab-user/{{ virt_migration_archive_filename }}"
-    mode: '0644'  # Set permissions for the downloaded file
-    url_username: "{{ s3_rhpds_private_username }}"  # Provide the username
-    url_password: "{{ s3_rhpds_private_password }}"  # Provide the password
-    force_basic_auth: true
-    #force: true # ignore cached copy
-    owner: lab-user
-    group: users
+  - name: Set fact for ansible playbooks repo
+    set_fact:
+      s3_rhpds_private_base_url: "https://d18h2xbjo1t4w8.cloudfront.net"
+      s3_rhpds_private_username: rhpds-private
+      s3_rhpds_private_password: "{{ s3_rhpds_private_password }}"
+      virt_migration_archive_path: "etx_virt_vma_factory/"
+      virt_migration_archive_filename: "redhat-cop_openshift-virtualization-migration_openshift_virtualization_migration.zip"
 
-# - name: Pull the virt migration factory image
-#   containers.podman.podman_image:
-#     name: quay.io/rhpds/openshift-virtualization-migration-ee-2.5
-#   become: true
-#   become_user: lab-user
-#   register: pull_ovs_image_result
-#   retries: 3
-#   delay: 5
-#   until: pull_ovs_image_result is succeeded
+  - name: Download virt migration playbook archive
+    ansible.builtin.get_url:
+      url: "https://d18h2xbjo1t4w8.cloudfront.net/{{ virt_migration_archive_path }}{{ virt_migration_archive_filename }}"
+      dest: "/home/lab-user/{{ virt_migration_archive_filename }}"
+      mode: '0644'  # Set permissions for the downloaded file
+      url_username: "{{ s3_rhpds_private_username }}"  # Provide the username
+      url_password: "{{ s3_rhpds_private_password }}"  # Provide the password
+      force_basic_auth: true
+      #force: true # ignore cached copy
+      owner: lab-user
+      group: users
 
-# - name: Tag image
-#   containers.podman.podman_tag:
-#     image: quay.io/mrobson/ovs-offline
-#     target_names:
-#       - ovs-offline
-#   become: true
-#   become_user: lab-user
+  # - name: Pull the virt migration factory image
+  #   containers.podman.podman_image:
+  #     name: quay.io/rhpds/openshift-virtualization-migration-ee-2.5
+  #   become: true
+  #   become_user: lab-user
+  #   register: pull_ovs_image_result
+  #   retries: 3
+  #   delay: 5
+  #   until: pull_ovs_image_result is succeeded
 
-# - name: Download ovs archive
-#   ansible.builtin.get_url:
-#     url: https://github.com/mrobson/network-policy-demo/raw/refs/heads/rh1lab/ovs-dump/ovs-offline-nov11.tgz
-#     dest: /home/lab-user/ModuleOVN/ovs-offline-nov11.tgz
-#     mode: '0644'  # Set permissions for the downloaded file
-#     owner: lab-user
-#     group: users
-#   async: 5000
-#   poll: 0
-#   register: async_ovs_archive
+  # - name: Tag image
+  #   containers.podman.podman_tag:
+  #     image: quay.io/mrobson/ovs-offline
+  #     target_names:
+  #       - ovs-offline
+  #   become: true
+  #   become_user: lab-user
 
-############################################
-# do other stuff while downloading must-gather
-############################################
+  # - name: Download ovs archive
+  #   ansible.builtin.get_url:
+  #     url: https://github.com/mrobson/network-policy-demo/raw/refs/heads/rh1lab/ovs-dump/ovs-offline-nov11.tgz
+  #     dest: /home/lab-user/ModuleOVN/ovs-offline-nov11.tgz
+  #     mode: '0644'  # Set permissions for the downloaded file
+  #     owner: lab-user
+  #     group: users
+  #   async: 5000
+  #   poll: 0
+  #   register: async_ovs_archive
 
-# - name: Install the latest version of wget, jq and golang
-#   ansible.builtin.dnf:
-#     name:
-#       - wget
-#       - jq
-#       - golang
-#     state: latest
-#   retries: 10
-#
-# - name: Download the yq tool
-#   ansible.builtin.get_url:
-#     url: https://github.com/mikefarah/yq/releases/download/v4.47.2/yq_linux_amd64
-#     dest: /usr/bin/yq
-#     mode: '0755'  # Set executable permission immediately during download
-#   register: download_result
-#   retries: 3
-#   delay: 5
-#   until: download_result is succeeded
-#
-# - name: Download the omc tool
-#   ansible.builtin.get_url:
-#     url: https://github.com/gmeghnag/omc/releases/download/v3.11.2/omc_Linux_x86_64
-#     dest: /usr/bin/omc
-#     mode: '0755'
-#   register: download_omc_result
-#   retries: 3
-#   delay: 5
-#   until: download_omc_result is succeeded
-#
-# - name: Download the oc tool
-#   ansible.builtin.get_url:
-#     url: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.19.13/openshift-client-linux-4.19.13.tar.gz
-#     dest: /tmp/openshift-client-linux-4.19.13.tar.gz
-#   register: download_oc_result
-#   retries: 3
-#   delay: 5
-#   until: download_oc_result is succeeded
-#
-# - name: Extract the oc tool
-#   ansible.builtin.unarchive:
-#     src: /tmp/openshift-client-linux-4.19.13.tar.gz
-#     dest: /tmp/
-#     remote_src: yes
-#   when: download_oc_result is succeeded
-#
-# - name: Move oc binary to /usr/bin
-#   ansible.builtin.command: mv /tmp/oc /usr/bin/oc
-#   when: download_oc_result is succeeded
-#
-# - name: Set executable permissions for oc tool
-#   ansible.builtin.file:
-#     path: /usr/bin/oc
-#     mode: '0755'
-#
-# - name: Download the kubectl-dev tool
-#   ansible.builtin.command: "{{ item }}"
-#   loop:
-#     - go install github.com/openshift/cluster-debug-tools/cmd/kubectl-dev_tool@latest
-#     - sudo cp ~/go/bin/kubectl-dev_tool /usr/bin/kubectl-dev_tool
-#     - chmod +x /usr/bin/kubectl-dev_tool
-#
-# - name: Download the etcd-ocp-diag.py tool
-#   ansible.builtin.get_url:
-#     url: https://raw.githubusercontent.com/cptmorgan-rh/etcd-ocp-diag-script/refs/heads/main/etcd-ocp-diag.py
-#     dest: /usr/bin/etcd-ocp-diag.py
-#     mode: '0755'  # Set executable permission during download
-#   register: download_etcd_diag_result
-#   retries: 3
-#   delay: 5
-#   until: download_etcd_diag_result is succeeded
-#
-# - name: Download the ocp-insights tool
-#   ansible.builtin.get_url:
-#     url: https://raw.githubusercontent.com/cptmorgan-rh/ocp_insights/refs/heads/main/ocp_insights.py
-#     dest: /usr/bin/ocp_insights.py
-#     mode: '0755'  # Set executable permission during download
-#   register: download_ocp_insights_result
-#   retries: 3
-#   delay: 5
-#   until: download_ocp_insights_result is succeeded
-#
-# - name: Clone a OVS git repository
-#   ansible.builtin.git:
-#     repo: https://github.com/mrobson/ovs-dbg.git
-#     dest: /home/lab-user/ModuleOVN/ovs-dbg
-#     version: rh1lab
-#     clone: yes
-#     update: yes
-#   become: true
-#   become_user: lab-user
-#   register: download_ovs_git_result
-#   retries: 3
-#   delay: 5
-#   until: download_ovs_git_result is succeeded
-#
-# - name: Pull an image
-#   containers.podman.podman_image:
-#     name: quay.io/mrobson/ovs-offline
-#   become: true
-#   become_user: lab-user
-#   register: pull_ovs_image_result
-#   retries: 3
-#   delay: 5
-#   until: pull_ovs_image_result is succeeded
-#
-# - name: Tag image
-#   containers.podman.podman_tag:
-#     image: quay.io/mrobson/ovs-offline
-#     target_names:
-#       - ovs-offline
-#   become: true
-#   become_user: lab-user
-#
-# - name: Remove 50-cloud-init.conf, ssh issue
-#   ansible.builtin.file:
-#     path: /etc/ssh/sshd_config.d/50-cloud-init.conf
-#     state: absent  # Remove the file
-#
-# - name: Remove 50-redhat.conf, ssh issue
-#   ansible.builtin.file:
-#     path: /etc/ssh/sshd_config.d/50-redhat.conf
-#     state: absent  # Remove the file
-#
-# - name: Update sshd_config for password authentication
-#   ansible.builtin.blockinfile:
-#     path: /etc/ssh/sshd_config
-#     state: present
-#     marker: "# {mark} Our custom SSH settings via Ansible"
-#     block: |
-#       # Our custom SSH settings via Ansible
-#       ChallengeResponseAuthentication no
-#       PasswordAuthentication yes
-#       UsePAM yes
-#
-# - name: Restart sshd to apply new configuration
-#   ansible.builtin.service:
-#     name: sshd
-#     state: restarted
-#
-# ######################
-# # finish long download
-# ######################
-#
-# - name: Wait for async_must_gather task to complete
-#   async_status:
-#     jid: "{{ async_must_gather.ansible_job_id }}"
-#   register: job_result
-#   until: job_result.finished  # Continue until the job is finished
-#   retries: 6000               # Number of retries
-#   delay: 10                   # Delay between retries
-#
-# - name: Wait for async_ovs_archive task to complete
-#   async_status:
-#     jid: "{{ async_ovs_archive.ansible_job_id }}"
-#   register: job_result
-#   until: job_result.finished  # Continue until the job is finished
-#   retries: 6000               # Number of retries
-#   delay: 10                   # Delay between retries
-#
-# - name: Unarchive must-gather file
-#   ansible.builtin.unarchive:
-#     src: /home/lab-user/{{ must_gather_filename }}
-#     dest: /home/lab-user
-#     remote_src: yes  # The source file is already on the remote machine
-#
-# - name: Unarchive ovs archive
-#   ansible.builtin.unarchive:
-#     src: /home/lab-user/ModuleOVN/ovs-offline-nov11.tgz
-#     dest: /home/lab-user/ModuleOVN
-#     remote_src: yes  # The source file is already on the remote machine
-#
-# - name: Change ownership of Module directories
-#   ansible.builtin.command: chown -R lab-user:users /home/lab-user/
-#
-# - name: Run the ovn backup containers
-#   ansible.builtin.command: /home/lab-user/ModuleOVN/ovs-dbg/bin/ovs-offline -w /home/lab-user/ModuleOVN/ovs-offline start
-#   become: true
-#   become_user: lab-user
+  ############################################
+  # do other stuff while downloading must-gather
+  ############################################
+
+  # - name: Install the latest version of wget, jq and golang
+  #   ansible.builtin.dnf:
+  #     name:
+  #       - wget
+  #       - jq
+  #       - golang
+  #     state: latest
+  #   retries: 10
+  #
+  # - name: Download the yq tool
+  #   ansible.builtin.get_url:
+  #     url: https://github.com/mikefarah/yq/releases/download/v4.47.2/yq_linux_amd64
+  #     dest: /usr/bin/yq
+  #     mode: '0755'  # Set executable permission immediately during download
+  #   register: download_result
+  #   retries: 3
+  #   delay: 5
+  #   until: download_result is succeeded
+  #
+  # - name: Download the omc tool
+  #   ansible.builtin.get_url:
+  #     url: https://github.com/gmeghnag/omc/releases/download/v3.11.2/omc_Linux_x86_64
+  #     dest: /usr/bin/omc
+  #     mode: '0755'
+  #   register: download_omc_result
+  #   retries: 3
+  #   delay: 5
+  #   until: download_omc_result is succeeded
+  #
+  # - name: Download the oc tool
+  #   ansible.builtin.get_url:
+  #     url: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.19.13/openshift-client-linux-4.19.13.tar.gz
+  #     dest: /tmp/openshift-client-linux-4.19.13.tar.gz
+  #   register: download_oc_result
+  #   retries: 3
+  #   delay: 5
+  #   until: download_oc_result is succeeded
+  #
+  # - name: Extract the oc tool
+  #   ansible.builtin.unarchive:
+  #     src: /tmp/openshift-client-linux-4.19.13.tar.gz
+  #     dest: /tmp/
+  #     remote_src: yes
+  #   when: download_oc_result is succeeded
+  #
+  # - name: Move oc binary to /usr/bin
+  #   ansible.builtin.command: mv /tmp/oc /usr/bin/oc
+  #   when: download_oc_result is succeeded
+  #
+  # - name: Set executable permissions for oc tool
+  #   ansible.builtin.file:
+  #     path: /usr/bin/oc
+  #     mode: '0755'
+  #
+  # - name: Download the kubectl-dev tool
+  #   ansible.builtin.command: "{{ item }}"
+  #   loop:
+  #     - go install github.com/openshift/cluster-debug-tools/cmd/kubectl-dev_tool@latest
+  #     - sudo cp ~/go/bin/kubectl-dev_tool /usr/bin/kubectl-dev_tool
+  #     - chmod +x /usr/bin/kubectl-dev_tool
+  #
+  # - name: Download the etcd-ocp-diag.py tool
+  #   ansible.builtin.get_url:
+  #     url: https://raw.githubusercontent.com/cptmorgan-rh/etcd-ocp-diag-script/refs/heads/main/etcd-ocp-diag.py
+  #     dest: /usr/bin/etcd-ocp-diag.py
+  #     mode: '0755'  # Set executable permission during download
+  #   register: download_etcd_diag_result
+  #   retries: 3
+  #   delay: 5
+  #   until: download_etcd_diag_result is succeeded
+  #
+  # - name: Download the ocp-insights tool
+  #   ansible.builtin.get_url:
+  #     url: https://raw.githubusercontent.com/cptmorgan-rh/ocp_insights/refs/heads/main/ocp_insights.py
+  #     dest: /usr/bin/ocp_insights.py
+  #     mode: '0755'  # Set executable permission during download
+  #   register: download_ocp_insights_result
+  #   retries: 3
+  #   delay: 5
+  #   until: download_ocp_insights_result is succeeded
+  #
+  # - name: Clone a OVS git repository
+  #   ansible.builtin.git:
+  #     repo: https://github.com/mrobson/ovs-dbg.git
+  #     dest: /home/lab-user/ModuleOVN/ovs-dbg
+  #     version: rh1lab
+  #     clone: yes
+  #     update: yes
+  #   become: true
+  #   become_user: lab-user
+  #   register: download_ovs_git_result
+  #   retries: 3
+  #   delay: 5
+  #   until: download_ovs_git_result is succeeded
+  #
+  # - name: Pull an image
+  #   containers.podman.podman_image:
+  #     name: quay.io/mrobson/ovs-offline
+  #   become: true
+  #   become_user: lab-user
+  #   register: pull_ovs_image_result
+  #   retries: 3
+  #   delay: 5
+  #   until: pull_ovs_image_result is succeeded
+  #
+  # - name: Tag image
+  #   containers.podman.podman_tag:
+  #     image: quay.io/mrobson/ovs-offline
+  #     target_names:
+  #       - ovs-offline
+  #   become: true
+  #   become_user: lab-user
+  #
+  # - name: Remove 50-cloud-init.conf, ssh issue
+  #   ansible.builtin.file:
+  #     path: /etc/ssh/sshd_config.d/50-cloud-init.conf
+  #     state: absent  # Remove the file
+  #
+  # - name: Remove 50-redhat.conf, ssh issue
+  #   ansible.builtin.file:
+  #     path: /etc/ssh/sshd_config.d/50-redhat.conf
+  #     state: absent  # Remove the file
+  #
+  # - name: Update sshd_config for password authentication
+  #   ansible.builtin.blockinfile:
+  #     path: /etc/ssh/sshd_config
+  #     state: present
+  #     marker: "# {mark} Our custom SSH settings via Ansible"
+  #     block: |
+  #       # Our custom SSH settings via Ansible
+  #       ChallengeResponseAuthentication no
+  #       PasswordAuthentication yes
+  #       UsePAM yes
+  #
+  # - name: Restart sshd to apply new configuration
+  #   ansible.builtin.service:
+  #     name: sshd
+  #     state: restarted
+  #
+  # ######################
+  # # finish long download
+  # ######################
+  #
+  # - name: Wait for async_must_gather task to complete
+  #   async_status:
+  #     jid: "{{ async_must_gather.ansible_job_id }}"
+  #   register: job_result
+  #   until: job_result.finished  # Continue until the job is finished
+  #   retries: 6000               # Number of retries
+  #   delay: 10                   # Delay between retries
+  #
+  # - name: Wait for async_ovs_archive task to complete
+  #   async_status:
+  #     jid: "{{ async_ovs_archive.ansible_job_id }}"
+  #   register: job_result
+  #   until: job_result.finished  # Continue until the job is finished
+  #   retries: 6000               # Number of retries
+  #   delay: 10                   # Delay between retries
+  #
+  # - name: Unarchive must-gather file
+  #   ansible.builtin.unarchive:
+  #     src: /home/lab-user/{{ must_gather_filename }}
+  #     dest: /home/lab-user
+  #     remote_src: yes  # The source file is already on the remote machine
+  #
+  # - name: Unarchive ovs archive
+  #   ansible.builtin.unarchive:
+  #     src: /home/lab-user/ModuleOVN/ovs-offline-nov11.tgz
+  #     dest: /home/lab-user/ModuleOVN
+  #     remote_src: yes  # The source file is already on the remote machine
+  #
+  # - name: Change ownership of Module directories
+  #   ansible.builtin.command: chown -R lab-user:users /home/lab-user/
+  #
+  # - name: Run the ovn backup containers
+  #   ansible.builtin.command: /home/lab-user/ModuleOVN/ovs-dbg/bin/ovs-offline -w /home/lab-user/ModuleOVN/ovs-offline start
+  #   become: true
+  #   become_user: lab-user
