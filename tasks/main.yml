@@ -1,6 +1,5 @@
----
-
-- hosts: bastion
+- hosts: bastions
+  gather_facts: false
   tasks:
 
   - name: Set fact for ansible playbooks repo
