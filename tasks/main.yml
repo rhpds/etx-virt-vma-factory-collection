@@ -4,7 +4,7 @@
     block:
 
     - name: Set fact for ansible playbooks repo
-      set_fact:
+      ansible.builtin.set_fact:
         s3_rhpds_private_base_url: "https://d18h2xbjo1t4w8.cloudfront.net"
         s3_rhpds_private_username: rhpds-private
         s3_rhpds_private_password: "{{ s3_rhpds_private_password }}"
