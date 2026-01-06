@@ -22,24 +22,22 @@
         #force: true # ignore cached copy
         owner: lab-user
         group: users
+      register: get_url_vma_result
+      retries: 3
+      delay: 15
+      until: get_url_vma_result is succeeded
 
-    # - name: Pull the virt migration factory image
-    #   containers.podman.podman_image:
-    #     name: quay.io/rhpds/openshift-virtualization-migration-ee-2.5
-    #   become: true
-    #   become_user: lab-user
-    #   register: pull_ovs_image_result
-    #   retries: 3
-    #   delay: 5
-    #   until: pull_ovs_image_result is succeeded
-
-    # - name: Tag image
-    #   containers.podman.podman_tag:
-    #     image: quay.io/mrobson/ovs-offline
-    #     target_names:
-    #       - ovs-offline
-    #   become: true
-    #   become_user: lab-user
+    - name: Pull the virt migration factory image
+      containers.podman.podman_image:
+        name: "{{ openshift_virtualization_migration_robot_quay_repository }}"
+        username: "{{ openshift_virtualization_migration_robot_quay_username }}"
+        password: "{{ openshift_virtualization_migration_robot_quay_password }}"
+      become: true
+      become_user: lab-user
+      register: pull_vma_image_result
+      retries: 3
+      delay: 15
+      until: pull_vma_image_result is succeeded
 
     # - name: Download ovs archive
     #   ansible.builtin.get_url:
