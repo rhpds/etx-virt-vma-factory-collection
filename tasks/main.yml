@@ -27,14 +27,15 @@
       delay: 15
       until: get_url_vma_result is succeeded
 
-    - name: Install podman
-      ansible.builtin.package:
-        state: present
-        name: podman
-      register: r_package
-      until: r_package is succeeded
-      retries: 5
-      delay: 10
+    # Sattelite is broken somehow.  Podman now installed prior to this playbook
+    # - name: Install podman
+    #   ansible.builtin.package:
+    #     state: present
+    #     name: podman
+    #   register: r_package
+    #   until: r_package is succeeded
+    #   retries: 5
+    #   delay: 10
 
     - name: Pull the virt migration factory image
       containers.podman.podman_image:
